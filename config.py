@@ -12,3 +12,8 @@ def load_config():
         with open(CONFIG_FILE, "r") as f:
             return json.load(f)
     return {}
+
+def save_credentials(email, password):
+    cfg = load_config()
+    cfg.update({"email": email, "password": password})
+    save_config(cfg)
