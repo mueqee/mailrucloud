@@ -1,9 +1,21 @@
 import requests
 import hashlib
 import os
-from auth import load_token
+from auth import load_token, refresh_token
 
 UPLOAD_LINK_URL = "https://cloud.mail.ru/api/v2/file/add"
+
+def _post_with_refresh(url, params=None, data=None, files=None, stream=False):
+    token_data = load_token()
+    headers = {"Authorization": f"Bearer {token_data['access_token']}"} if token_data else {}
+    response = requests.post(url, headers=headers, params=params, data=data, files=files, stream=stream)
+    if response.status_code == 401:
+        print("[DEBUG] Токен истёк, обновляем...")
+        if refresh_token():
+            token_data = load_token()
+            headers["Authorization"] = f"Bearer {token_data['access_token']}"
+            response = requests.post(url, headers=headers, params=params, data=data, files=files, stream=stream)
+    return response
 
 def get_upload_url(filename, filesize):
     token_data = load_token()
@@ -25,7 +37,7 @@ def get_upload_url(filename, filesize):
         "name": os.path.basename(filename)
     }
 
-    response = requests.post(UPLOAD_LINK_URL, headers=headers, params=params)
+    response = _post_with_refresh(UPLOAD_LINK_URL, params=params)
     if response.status_code == 200:
         body = response.json().get("body", {})
         return body.get("upload_url"), body.get("cloud_path")

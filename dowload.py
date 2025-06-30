@@ -1,7 +1,19 @@
 import requests
-from auth import load_token
+from auth import load_token, refresh_token
 
 DOWNLOAD_LINK_URL = "https://cloud.mail.ru/api/v2/file/download"
+
+def _get_with_refresh(url, params=None, stream=False):
+    token_data = load_token()
+    headers = {"Authorization": f"Bearer {token_data['access_token']}"} if token_data else {}
+    response = requests.get(url, headers=headers, params=params, stream=stream)
+    if response.status_code == 401:
+        print("[DEBUG] Токен истёк, обновляем...")
+        if refresh_token():
+            token_data = load_token()
+            headers["Authorization"] = f"Bearer {token_data['access_token']}"
+            response = requests.get(url, headers=headers, params=params, stream=stream)
+    return response
 
 def get_download_url(remote_path):
     token_data = load_token()
