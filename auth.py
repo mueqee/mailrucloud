@@ -2,6 +2,7 @@ import requests
 import json
 import os
 from config import load_config
+from typing import Optional
 
 TOKEN_FILE = ".token.json"
 API_URL = "https://o2.mail.ru/token"
@@ -39,9 +40,6 @@ def load_token():
     return None
 
 def refresh_token():
-    """
-    Обновляет токен, используя сохранённые учётные данные из конфигурации.
-    """
     config = load_config()
     email = config.get("email")
     password = config.get("password")
@@ -49,3 +47,19 @@ def refresh_token():
         raise RuntimeError("Не удалось обновить токен: в конфиге отсутствуют email или password")
     print(f"[DEBUG] Обновление токена для {email}...")
     return login(email, password)
+
+def save_token(data: dict):
+    with open(TOKEN_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f"[DEBUG] Сохранили токен: {data}")
+
+
+def get_token() -> Optional[str]:
+    try:
+        with open(TOKEN_FILE, 'r') as f:
+            data = json.load(f)
+        print(f"[DEBUG] Загрузили токен из файла: {data}")
+        return data.get("access_token")
+    except FileNotFoundError:
+        print("[DEBUG] Файл токена не найден.")
+        return None

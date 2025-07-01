@@ -28,6 +28,7 @@ def list_files(path="/"):
 
     params = {
         "home": "true",
+        "folder": path,
         "page": 1,
         "limit": 100
     }
