@@ -34,6 +34,13 @@ def list_files(path: str = "/") -> list:
     }
 
     url = "https://cloud.mail.ru/api/v2/folder"
+
+    # Отладочный вывод
+    print(f"DEBUG: Request URL: {url}")
+    print(f"DEBUG: Request Headers: {headers}")
+    print(f"DEBUG: Request Params: {params}")
+    # до эт
+
     response = requests.get(url, headers=headers, params=params)
 
     if response.status_code == 200:
