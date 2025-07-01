@@ -24,13 +24,15 @@ def list_files(path: str = "/") -> list:
 
     access_token = token_data.get("access_token")
     headers = {
-        "Authorization": f"Bearer {access_token}"
+        "Authorization": f"Bearer {access_token}",
+        "User-Agent": "Cloud-Windows/19.09.0018"
     }
 
     params = {
-        "folder": path,
-        "page": 1,
-        "limit": 100
+        'api': 2,
+        'home': path,
+        'offset': 0,
+        'limit': 100
     }
 
     url = "https://cloud.mail.ru/api/v2/folder"
@@ -39,7 +41,7 @@ def list_files(path: str = "/") -> list:
     print(f"DEBUG: Request URL: {url}")
     print(f"DEBUG: Request Headers: {headers}")
     print(f"DEBUG: Request Params: {params}")
-    # до эт
+    #
 
     response = requests.get(url, headers=headers, params=params)
 
