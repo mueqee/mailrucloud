@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Configs & Secrets
+.token.json
+.mailrucloud_config.json
+*.env
+
+# IDE
+.idea/
+.vscode/
