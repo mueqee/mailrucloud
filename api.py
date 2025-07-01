@@ -1,5 +1,6 @@
 import requests
 from auth import load_token
+from auth import refresh_token
 
 def _request_with_refresh(method, url, **kwargs):
     token_data = load_token()
@@ -15,7 +16,7 @@ def _request_with_refresh(method, url, **kwargs):
             response = requests.request(method, url, headers=headers, **kwargs)
     return response
 
-def list_files(path="/"):
+def list_files(path: str = "/") -> list:
     token_data = load_token()
     if not token_data:
         print("Токен не найден. Выполните вход через 'login'.")
@@ -27,7 +28,6 @@ def list_files(path="/"):
     }
 
     params = {
-        "home": "true",
         "folder": path,
         "page": 1,
         "limit": 100
