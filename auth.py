@@ -1,65 +1,50 @@
-import requests
+# mailrucloud/auth.py
+"""Модуль авторизации для WebDAV-доступа к Облаку Mail.ru.
+Схема проста: сохраняем в файл email и *пароль для внешнего приложения*.
+Никаких сетевых запросов при логине не требуется – WebDAV обрабатывает
+Basic-авторизацию самостоятельно.
+"""
+
 import json
 import os
-from config import load_config
+from pathlib import Path
 from typing import Optional
 
-TOKEN_FILE = ".token.json"
-API_URL = "https://o2.mail.ru/token"
-CLIENT_ID = "cloud-win"
+CRED_FILE = Path.home() / ".mailrucloud_credentials.json"
 
-def login(username, password):
-    data = {
-        "client_id": CLIENT_ID,
-        "grant_type": "password",
-        "username": username,
-        "password": password
-    }
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    response = requests.post(API_URL, data=data, headers=headers)
+def login(username: str, app_password: str) -> bool:
+    """Сохраняет учётные данные в файл.
 
-    response = requests.post(API_URL, data=data, headers=headers)
-
-    if response.status_code == 200:
-        tokens = response.json()
-        with open(TOKEN_FILE, "w") as f:
-            json.dump(tokens, f)
-        print("Успешная авторизация. Токен сохранён.")
-        return True
-    else:
-        print("Ошибка авторизации:", response.text)
+    Parameters
+    ----------
+    username : str
+        Полный e-mail пользователя (например, `user@mail.ru`).
+    app_password : str
+        Пароль для внешнего приложения, созданный в настройках безопасности
+        Mail.ru. *Не* обычный пароль от почты!
+    """
+    if "@" not in username:
+        print("❌ Введите полный e-mail, например user@mail.ru")
         return False
 
-def load_token():
-    if os.path.exists(TOKEN_FILE):
-        with open(TOKEN_FILE, "r") as f:
-            return json.load(f)
-    return None
-
-def refresh_token():
-    config = load_config()
-    email = config.get("email")
-    password = config.get("password")
-    if not email or not password:
-        raise RuntimeError("Не удалось обновить токен: в конфиге отсутствуют email или password")
-    print(f"[DEBUG] Обновление токена для {email}...")
-    return login(email, password)
-
-def save_token(data: dict):
-    with open(TOKEN_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
-    print(f"[DEBUG] Сохранили токен: {data}")
-
-
-def get_token() -> Optional[str]:
+    data = {"email": username, "password": app_password}
     try:
-        with open(TOKEN_FILE, 'r') as f:
-            data = json.load(f)
-        print(f"[DEBUG] Загрузили токен из файла: {data}")
-        return data.get("access_token")
-    except FileNotFoundError:
-        print("[DEBUG] Файл токена не найден.")
+        CRED_FILE.write_text(json.dumps(data))
+        print(f"✅ Данные сохранены в {CRED_FILE}")
+        return True
+    except OSError as exc:
+        print(f"❌ Не удалось сохранить файл учётных данных: {exc}")
+        return False
+
+
+def load_credentials() -> Optional[dict]:
+    """Читает файл учётных данных и возвращает словарь с ключами
+    `email` и `password`. Если файл отсутствует – ``None``.
+    """
+    if not CRED_FILE.exists():
+        return None
+    try:
+        return json.loads(CRED_FILE.read_text())
+    except (OSError, json.JSONDecodeError):
         return None
