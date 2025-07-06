@@ -69,8 +69,16 @@ def download(remote_path, local_path):
 @cli.command()
 @click.argument('local_dir', default='.')
 @click.argument('remote_dir', default='/')
-def sync(local_dir, remote_dir):
-    """Односторонняя синхронизация LOCAL_DIR → REMOTE_DIR."""
-    click.echo(f"⏳ Синхронизирую {local_dir} → {remote_dir}")
-    sync_directories(local_dir, remote_dir)
+@click.option('--direction', '-d', type=click.Choice(['push', 'pull', 'both'], case_sensitive=False),
+              default='both', show_default=True,
+              help="Направление: push (локальное → облако), pull (облако → локальное), both (двусторонняя)")
+def sync(local_dir, remote_dir, direction):
+    """Синхронизация каталогов LOCAL_DIR и REMOTE_DIR."""
+    arrow = {
+        'push': '→',
+        'pull': '←',
+        'both': '↔',
+    }[direction.lower()]
+    click.echo(f"⏳ Синхронизация {local_dir} {arrow} {remote_dir} (mode: {direction})")
+    sync_directories(local_dir, remote_dir, direction.lower())
     click.secho("✅ Синхронизация завершена.", fg="green")
