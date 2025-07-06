@@ -5,8 +5,8 @@
 ## Установка
 
 ```bash
-git clone https://github.com/youruser/mailru-cloud-python.git
-cd mailru-cloud-python
+git clone https://github.com/mueqee/mailrucloud.git
+cd mailrucloud
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -19,6 +19,7 @@ python main.py
 - `ls`: Показать список файлов/папок
 - `upload <LOCAL_PATH>`: Загрузить файл в облако
 - `download`: Скачать файл (пример ниже)
+- `sync [OPTIONS] <LOCAL_DIR> <REMOTE_DIR>`: Синхронизация каталогов (поддерживает режимы `push`, `pull`, `both`)
 
 ### Авторизация и пароли
 
@@ -72,3 +73,18 @@ diff /tmp/hello.txt /tmp/hello_from_cloud.txt  # должно быть пуст�
 ```
 
 При выполнении `python main.py login` создаётся файл `~/.mailru_token.json`
+
+## Синхронизация каталогов
+
+```bash
+# Двусторонняя (both — по умолчанию)
+python main.py sync ~/Documents /backup
+
+# Только загрузка локальных изменений → облако
+python main.py sync ~/Documents /backup --direction push
+
+# Только скачивание изменений из облака
+python main.py sync ~/Documents /backup -d pull
+```
+
+Файлы, отсутствующие на одной из сторон, будут скопированы. Удаление пока не синхронизируется.

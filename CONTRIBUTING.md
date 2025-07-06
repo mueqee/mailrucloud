@@ -8,5 +8,6 @@
 2.  Создайте новую ветку для своей фичи (`git checkout -b feature/AmazingFeature`).
 3.  Внесите изменения и сделайте коммиты.
 4.  **Важно:** Мы используем [Conventional Commits](https://www.conventionalcommits.org/ru/v1.0.0/). Пожалуйста, следуйте этому стандарту.
+    Сообщения пишем **на русском языке**.
 5.  Отправьте изменения в свой форк (`git push origin feature/AmazingFeature`).
 6.  Создайте Pull Request.
