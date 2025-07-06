@@ -23,9 +23,10 @@ def login_cmd(username, password):
 
 
 @cli.command()
-def ls():
-    """Список файлов в корне облака"""
-    files = list_files("/")
+@click.argument('remote_dir', default='/', required=False)
+def ls(remote_dir):
+    """Показать содержимое каталога в облаке (по умолчанию «/»)."""
+    files = list_files(remote_dir)
     for f in files:
         click.echo(f)
 
