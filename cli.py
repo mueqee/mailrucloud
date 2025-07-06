@@ -1,6 +1,6 @@
 import click
 from auth import login
-from api import list_files
+from api import list_files, delete_file, move_file, file_info
 from upload import upload_file
 from download import download_file
 from sync import sync_directories
@@ -82,3 +82,38 @@ def sync(local_dir, remote_dir, direction):
     click.echo(f"⏳ Синхронизация {local_dir} {arrow} {remote_dir} (mode: {direction})")
     sync_directories(local_dir, remote_dir, direction.lower())
     click.secho("✅ Синхронизация завершена.", fg="green")
+
+
+@cli.command(name='rm')
+@click.argument('remote_path')
+def cmd_rm(remote_path):
+    """Удалить файл/папку в облаке."""
+    click.echo(f"⏳ Удаляю {remote_path} …")
+    if delete_file(remote_path):
+        click.secho("✅ Удалено.", fg="green")
+    else:
+        click.secho("❌ Ошибка удаления.", fg="red")
+
+
+@cli.command(name='mv')
+@click.argument('src_path')
+@click.argument('dst_path')
+def cmd_mv(src_path, dst_path):
+    """Переименовать/переместить файл в облаке."""
+    click.echo(f"⏳ Перемещаю {src_path} → {dst_path}")
+    if move_file(src_path, dst_path):
+        click.secho("✅ Готово.", fg="green")
+    else:
+        click.secho("❌ Ошибка перемещения.", fg="red")
+
+
+@cli.command()
+@click.argument('remote_path')
+def info(remote_path):
+    """Показать информацию о файле (size, modified и т.п.)."""
+    data = file_info(remote_path)
+    if not data:
+        click.secho("❌ Не удалось получить информацию.", fg="red")
+        return
+    for k, v in data.items():
+        click.echo(f"{k}: {v}")

@@ -20,6 +20,9 @@ python main.py
 - `upload <LOCAL_PATH>`: Загрузить файл в облако
 - `download`: Скачать файл (пример ниже)
 - `sync [OPTIONS] <LOCAL_DIR> <REMOTE_DIR>`: Синхронизация каталогов (поддерживает режимы `push`, `pull`, `both`)
+- `rm <REMOTE_PATH>`: Удалить файл/папку
+- `mv <SRC> <DST>`: Переименовать/переместить файл
+- `info <REMOTE_PATH>`: Показать информацию о файле
 
 ### Авторизация и пароли
 
