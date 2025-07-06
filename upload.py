@@ -1,66 +1,27 @@
-import requests
-import hashlib
 import os
-from auth import load_token, refresh_token
+from pathlib import Path
 
-UPLOAD_LINK_URL = "https://cloud.mail.ru/api/v2/file/add"
+from network import get_client
 
-def _post_with_refresh(url, params=None, data=None, files=None, stream=False):
-    token_data = load_token()
-    headers = {"Authorization": f"Bearer {token_data['access_token']}"} if token_data else {}
-    response = requests.post(url, headers=headers, params=params, data=data, files=files, stream=stream)
-    if response.status_code == 401:
-        print("[DEBUG] Токен истёк, обновляем...")
-        if refresh_token():
-            token_data = load_token()
-            headers["Authorization"] = f"Bearer {token_data['access_token']}"
-            response = requests.post(url, headers=headers, params=params, data=data, files=files, stream=stream)
-    return response
 
-def get_upload_url(filename, filesize):
-    token_data = load_token()
-    if not token_data:
-        print("Токен не найден. Выполните вход через 'login'.")
-        return None
+def upload_file(local_path: str, remote_dir: str = "/") -> bool:
+    """Загружает файл `local_path` в облако в папку `remote_dir`.
 
-    headers = {
-        "Authorization": f"Bearer {token_data['access_token']}"
-    }
-
-    filehash = hashlib.md5((filename + str(filesize)).encode()).hexdigest()
-
-    params = {
-        "home": "true",
-        "conflict": "rename",
-        "hash": filehash,
-        "size": filesize,
-        "name": os.path.basename(filename)
-    }
-
-    response = _post_with_refresh(UPLOAD_LINK_URL, params=params)
-    if response.status_code == 200:
-        body = response.json().get("body", {})
-        return body.get("upload_url"), body.get("cloud_path")
-    else:
-        print("Ошибка получения ссылки загрузки:", response.text)
-        return None, None
-
-def upload_file(local_path):
+    Согласно спецификации WebDAV, если файл уже существует, он будет
+    перезаписан. При необходимости можно beforehand проверить наличие
+    через `client.check`.
+    """
     if not os.path.exists(local_path):
         print("Файл не найден:", local_path)
         return False
 
-    filesize = os.path.getsize(local_path)
-    upload_url, remote_path = get_upload_url(local_path, filesize)
-    if not upload_url:
-        return False
+    client = get_client()
+    filename = Path(local_path).name
+    remote_path = os.path.join(remote_dir, filename)
 
-    with open(local_path, "rb") as f:
-        response = requests.put(upload_url, data=f)
-
-    if response.status_code == 200 or response.status_code == 201:
-        print(f"Файл успешно загружен в: {remote_path}")
+    try:
+        client.upload_sync(remote_path=remote_path, local_path=local_path)
         return True
-    else:
-        print("Ошибка при загрузке:", response.text)
+    except Exception as exc:
+        print(f"Ошибка при загрузке файла: {exc}")
         return False
