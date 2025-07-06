@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-CRED_FILE = Path.home() / ".mailrucloud_credentials.json"
+CRED_FILE = Path.home() / ".mailru_token.json"
 
 
 def login(username: str, app_password: str) -> bool:
