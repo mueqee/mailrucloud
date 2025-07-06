@@ -15,3 +15,6 @@ venv/
 # IDE
 .idea/
 .vscode/
+
+# Local manual test checklist (не коммитится)
+tests/LOCAL_CHECKLIST.md
