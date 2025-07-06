@@ -44,7 +44,7 @@ python main.py list /
 
 ### 2.3 Скачивание файла
 ```bash
-python main.py download /test_small.txt --local-path /tmp/test_small.txt
+python main.py download /test_small.txt --local-path ~/test_small.txt
 ```
 • Убедитесь, что файл появился в `/tmp` и совпадает по размеру/хэшу с оригинальным.
 
@@ -69,7 +69,7 @@ python main.py upload tests/test_small.txt --remote-path /test_small.txt
 1. Загрузите `tests/test_image.jpg`.
 2. Скачайте файл в другую папку и сравните MD5-суммы:
    ```bash
-   md5sum tests/test_image.jpg /tmp/test_image.jpg
+   md5sum tests/test_image.jpg ~/test_image.jpg
    ```
    Хэши должны совпасть.
 
@@ -78,9 +78,9 @@ python main.py upload tests/test_small.txt --remote-path /test_small.txt
 ## 5. Тестирование команды sync
 
 ```bash
-mkdir /tmp/cloud_sync
-cp tests/test_small.txt /tmp/cloud_sync/
-python main.py sync /tmp/cloud_sync /
+mkdir ~/cloud_sync
+cp tests/test_small.txt ~/cloud_sync/
+python main.py sync ~/cloud_sync /
 ```
 • Файл должен появиться в корне облака.
 

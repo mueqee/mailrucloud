@@ -63,16 +63,16 @@ CLI запросит ваш email и пароль от Mail.ru.
 python main.py ls
 
 # Загрузка файла
-echo "hello" > /tmp/hello.txt
-python main.py upload /tmp/hello.txt
+echo "hello" > ~/hello.txt
+python main.py upload ~/hello.txt
 
 # Скачивание файла
 python - <<'PY'
 from download import download_file
-download_file('/hello.txt', '/tmp/hello_from_cloud.txt')
+download_file('/hello.txt', '~/hello_from_cloud.txt')
 PY
 
-diff /tmp/hello.txt /tmp/hello_from_cloud.txt  # должно быть пусто
+diff ~/hello.txt ~/hello_from_cloud.txt  # должно быть пусто
 ```
 
 При выполнении `python main.py login` создаётся файл `~/.mailru_token.json`
