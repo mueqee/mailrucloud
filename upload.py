@@ -4,20 +4,20 @@ from pathlib import Path
 from network import get_client
 
 
-def upload_file(local_path: str, remote_dir: str = "/") -> bool:
-    """Загружает файл `local_path` в облако в папку `remote_dir`.
+def upload_file(local_path: str, remote_path: str | None = None) -> bool:
+    """Загружает файл `local_path` в облако.
 
-    Согласно спецификации WebDAV, если файл уже существует, он будет
-    перезаписан. При необходимости можно beforehand проверить наличие
-    через `client.check`.
+    Если `remote_path` не указан, файл сохраняется в корне облака под тем же
+    именем.  При конфликтах WebDAV перезаписывает существующий файл.
     """
     if not os.path.exists(local_path):
         print("Файл не найден:", local_path)
         return False
 
+    if remote_path is None:
+        remote_path = "/" + Path(local_path).name
+
     client = get_client()
-    filename = Path(local_path).name
-    remote_path = os.path.join(remote_dir, filename)
 
     try:
         client.upload_sync(remote_path=remote_path, local_path=local_path)
