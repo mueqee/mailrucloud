@@ -5,7 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/mailru-cloud-cli.svg)](https://pypi.org/project/mailru-cloud-cli/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> Неофициальный клиент для майл ру Python-CLI [Mail.ru Облака](https://cloud.mail.ru), работающий через WebDAV
+> Неофициальный Python-CLI [Mail.ru Облака](https://cloud.mail.ru) клиент для майл ру, работающий через WebDAV
 
 `mailrucloud` позволяет управлять файлами из терминала: загружать, скачивать, синхронизировать каталоги, получать информацию о файлах и многое другое. Проект вдохновлён [gdrive](https://github.com/prasmussen/gdrive) и стремится предоставить такой же простой UX, но для Mail.ru Cloud.
 
