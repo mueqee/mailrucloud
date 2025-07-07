@@ -23,3 +23,9 @@ tests/LOCAL_CHECKLIST.md
 dist/
 *.egg-info/
 
+# Test artifacts
+.pytest_cache/
+coverage.xml
+htmlcov/
+.mypy_cache/
+
