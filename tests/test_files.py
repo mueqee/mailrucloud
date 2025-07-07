@@ -39,6 +39,7 @@ SAMPLES = [
 ]
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("local_name, remote_path", SAMPLES)
 def test_upload_and_download(local_name: str, remote_path: str, tmp_path: Path) -> None:
     local_path = Path(__file__).parent / local_name
