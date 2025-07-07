@@ -18,3 +18,8 @@ venv/
 
 # Local manual test checklist (не коммитится)
 tests/LOCAL_CHECKLIST.md
+
+# Build artifacts
+dist/
+*.egg-info/
+

@@ -1,0 +1,44 @@
+[project]
+name = "mailru-cloud-cli"
+version = "1.3.0"
+description = "Неофициальный CLI-клиент для Mail.ru Cloud (WebDAV)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    {name = "mueqee", email = "you@example.com"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+]
+
+dependencies = [
+    "click>=8",
+    "webdavclient3>=3.14",
+    "pytest>=8", # для пользователей, желающих запускать тесты
+]
+
+[project.scripts]
+mailrucloud = "main:cli"
+
+[project.urls]
+Homepage = "https://github.com/mueqee/mailrucloud"
+Changelog = "https://github.com/mueqee/mailrucloud/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = [
+    "api",
+    "auth",
+    "cli",
+    "download",
+    "main",
+    "network",
+    "sync",
+    "upload",
+] 
