@@ -41,4 +41,5 @@ py-modules = [
     "network",
     "sync",
     "upload",
+    "sync_daemon",
 ] 

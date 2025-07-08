@@ -10,7 +10,7 @@ def list_files(path: str = "/") -> list[str]:
         return client.list(path)  # type: ignore[arg-type]
     except Exception as exc:
         print(f"Ошибка при получении списка файлов: {exc}")
-    return []
+    return [] 
 
 
 # --- Дополнительные операции ---------------------------------------------------
