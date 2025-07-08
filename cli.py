@@ -118,3 +118,63 @@ def info(remote_path):
         return
     for k, v in data.items():
         click.echo(f"{k}: {v}")
+
+
+@cli.command()
+def start():
+    """Запустить фоновую синхронизацию каталога ~/Mail.Cloud ↔ /."""
+    import subprocess
+    import sys
+    import os
+    from pathlib import Path
+
+    local_dir = Path.home() / "Mail.Cloud"
+    local_dir.mkdir(parents=True, exist_ok=True)
+
+    pid_file = Path.home() / ".mailrucloud-daemon.pid"
+    # Проверяем, не запущен ли демон уже
+    if pid_file.exists():
+        try:
+            pid = int(pid_file.read_text().strip())
+            os.kill(pid, 0)  # Проверка существования процесса
+            click.secho("⚠️  Демон уже запущен.", fg="yellow")
+            return
+        except (ProcessLookupError, ValueError):
+            # PID-файл устарел – удаляем
+            pid_file.unlink(missing_ok=True)
+        except PermissionError:
+            click.secho("❌ Нет прав проверить состояние демона.", fg="red")
+            return
+
+    daemon_script = Path(__file__).with_name("sync_daemon.py")
+    try:
+        subprocess.Popen(
+            [sys.executable, str(daemon_script)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        click.secho("✅ Демон синхронизации запущен в фоне.", fg="green")
+    except Exception as exc:
+        click.secho(f"❌ Не удалось запустить демон: {exc}", fg="red")
+
+
+@cli.command()
+def stop():
+    """Остановить фоновый демон синхронизации."""
+    import os
+    import signal
+    from pathlib import Path
+    pid_file = Path.home() / ".mailrucloud-daemon.pid"
+    if not pid_file.exists():
+        click.secho("❌ PID-файл не найден. Демон не запущен?", fg="red")
+        return
+    try:
+        with open(pid_file) as f:
+            pid = int(f.read().strip())
+        os.kill(pid, signal.SIGTERM)
+        click.secho(f"✅ Отправлен сигнал SIGTERM процессу {pid}.", fg="green")
+        # Удаляем PID-файл сразу, система всё равно отдаст сигнал процессу
+        pid_file.unlink(missing_ok=True)
+    except Exception as exc:
+        click.secho(f"❌ Не удалось остановить демон: {exc}", fg="red")
