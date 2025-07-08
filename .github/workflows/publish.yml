@@ -3,7 +3,11 @@ name: Publish (TestPyPI)
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "v*.*.*a*"   # alpha
+      - "v*.*.*b*"   # beta
+      - "v*.*.*rc*"  # release candidates
+      - "v*.*.*dev*" # dev builds
+  workflow_dispatch:
 
 jobs:
   build-publish:
@@ -24,6 +28,7 @@ jobs:
           python -m build
 
       - name: Upload to TestPyPI
+        if: startsWith(github.ref, 'refs/tags/')
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
