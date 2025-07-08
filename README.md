@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mueqee/mailrucloud/actions/workflows/ci.yml/badge.svg)](https://github.com/mueqee/mailrucloud/actions/workflows/ci.yml)
 [![Publish](https://github.com/mueqee/mailrucloud/actions/workflows/publish.yml/badge.svg)](https://github.com/mueqee/mailrucloud/actions/workflows/publish.yml)
-[![PyPI](https://img.shields.io/pypi/v/mailrucloud.svg)](https://pypi.org/project/mailrucloud/)
+[![PyPI](https://img.shields.io/pypi/v/mailru-cloud-cli.svg)](https://pypi.org/project/mailru-cloud-cli/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 > Неофициальный Python-CLI [Mail.ru Облака](https://cloud.mail.ru) клиент для майл ру, работающий через WebDAV
@@ -43,7 +43,7 @@
 
 ### PyPI (будет доступно после релиза v1.4.0)
 ```bash
-pip install --upgrade mailrucloud  # ещё не опубликовано
+pip install --upgrade mailru-cloud-cli
 ```
 
 ### TestPyPI (текущие бета-релизы)
@@ -51,7 +51,7 @@ pip install --upgrade mailrucloud  # ещё не опубликовано
 python -m pip install --upgrade \
   -i https://test.pypi.org/simple \
   --extra-index-url https://pypi.org/simple \
-  mailrucloud==1.3.1
+  mailru-cloud-cli==1.3.1
 ```
 
 ### Из исходников
