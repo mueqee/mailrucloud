@@ -43,7 +43,7 @@
 
 ### PyPI (стабильная версия)
 ```bash
-pip install --upgrade mailru-cloud-cli
+pip install mailru-cloud-cli
 ```
 
 ### TestPyPI (текущие бета-релизы)
