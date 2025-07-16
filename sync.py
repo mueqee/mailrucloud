@@ -26,6 +26,15 @@ def _posix_join(*segments: str) -> str:
     return "/".join(s.strip("/") for s in segments if s)
 
 
+def ensure_remote_dirs(client, remote_path):
+    """Рекурсивно создаёт все родительские директории в облаке."""
+    parts = remote_path.strip('/').split('/')
+    for i in range(1, len(parts)+1):
+        subdir = '/' + '/'.join(parts[:i])
+        if not client.check(subdir):
+            client.mkdir(subdir)
+
+
 def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "both") -> None:
     """Синхронизация содержимого *local_dir* и *remote_dir*.
 
@@ -77,8 +86,8 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
                     print(f"→ upload {local_path} → {remote_path}")
                     # ensure parent dir exists
                     parent_remote = "/" + "/".join(remote_path.strip('/').split('/')[:-1])
-                    if parent_remote and not client.check(parent_remote):  # type: ignore[arg-type]
-                        client.mkdir(parent_remote)  # type: ignore[arg-type]
+                    if parent_remote:
+                        ensure_remote_dirs(client, parent_remote)
                     upload_file(str(local_path), remote_path)
 
     # --- PULL: облако → локальная -------------------------------------------------
