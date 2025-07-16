@@ -46,4 +46,5 @@ def load_credentials() -> Optional[dict]:
     try:
         return json.loads(CRED_FILE.read_text())
     except (OSError, json.JSONDecodeError):
-        return None
+        print(f"❌ Не удалось прочитать файл учётных данных: {CRED_FILE}")
+    return None
