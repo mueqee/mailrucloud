@@ -41,12 +41,20 @@
 
 > Требования: Python ≥ 3.10
 
-### PyPI (стабильная версия)
+### Вариант 1: PyPI (стабильная версия)
 ```bash
 pip install mailru-cloud-cli
 ```
+> Если видите ошибку "externally-managed-environment", используйте виртуальное окружение:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 
-### TestPyPI (текущие бета-релизы)
+# Список команд
+mailrucloud --help
+```
+
+### Вариант 2: TestPyPI (текущие бета-релизы)
 ```bash
 python -m pip install --upgrade \
   -i https://test.pypi.org/simple \
@@ -54,7 +62,7 @@ python -m pip install --upgrade \
   mailru-cloud-cli==1.3.2
 ```
 
-### Из исходников
+### Вариант 3: Из исходников (рекомендуется для разработки)
 ```bash
 git clone https://github.com/mueqee/mailrucloud.git
 cd mailrucloud
