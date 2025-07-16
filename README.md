@@ -49,11 +49,11 @@ pip install mailru-cloud-cli
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Список команд
+```
+> Список команд
+```
 mailrucloud --help
 ```
-
 ### Вариант 2: TestPyPI (текущие бета-релизы)
 ```bash
 python -m pip install --upgrade \
