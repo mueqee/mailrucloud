@@ -2,3 +2,4 @@ requests
 click
 webdavclient3
 pytest
+rich

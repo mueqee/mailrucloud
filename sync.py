@@ -19,6 +19,7 @@ from typing import Any
 from network import get_client
 from upload import upload_file  # переиспользуем функцию
 from download import download_file
+from rich.progress import Progress
 
 
 def _posix_join(*segments: str) -> str:
@@ -60,6 +61,8 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
 
     # --- PUSH: локальное → облако -------------------------------------------------
     if direction in {"push", "both"}:
+        # Собираем список всех файлов для загрузки
+        files_to_upload = []
         for root, _dirs, files in os.walk(local_dir_path):
             root_path = Path(root)
             rel_root = root_path.relative_to(local_dir_path)
@@ -71,11 +74,11 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
                 # Проверяем необходимость загрузки
                 needs_upload = False
                 try:
-                    if not client.check(remote_path):  # type: ignore[arg-type]
+                    if not client.check(remote_path):
                         needs_upload = True
                     else:
-                        info: dict[str, Any] = client.info(remote_path)  # type: ignore[arg-type]
-                        remote_size = int(info.get('size', -1))
+                        remote_info: dict[str, Any] = client.info(remote_path)
+                        remote_size = int(remote_info.get('size', -1))
                         local_size = local_path.stat().st_size
                         if remote_size != local_size:
                             needs_upload = True
@@ -83,12 +86,17 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
                     needs_upload = True
 
                 if needs_upload:
-                    print(f"→ upload {local_path} → {remote_path}")
-                    # ensure parent dir exists
-                    parent_remote = "/" + "/".join(remote_path.strip('/').split('/')[:-1])
-                    if parent_remote:
-                        ensure_remote_dirs(client, parent_remote)
-                    upload_file(str(local_path), remote_path)
+                    files_to_upload.append((local_path, remote_path))
+
+        # Прогресс-бар
+        with Progress() as progress:
+            task = progress.add_task("Загрузка файлов...", total=len(files_to_upload))
+            for local_path, remote_path in files_to_upload:
+                parent_remote = "/" + "/".join(remote_path.strip('/').split('/')[:-1])
+                if parent_remote:
+                    ensure_remote_dirs(client, parent_remote)
+                upload_file(str(local_path), remote_path)
+                progress.update(task, advance=1, description=f"[green]Загрузка: {local_path.name}")
 
     # --- PULL: облако → локальная -------------------------------------------------
     if direction in {"pull", "both"}:
