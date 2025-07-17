@@ -48,7 +48,7 @@ pip install mailru-cloud-cli
 ```
 > Если видите ошибку "externally-managed-environment", используйте виртуальное окружение:
 ```bash
-python3 -m venv .venv
+python3 -m venv .venv --upgrade-deps
 source .venv/bin/activate
 ```
 > Список команд
