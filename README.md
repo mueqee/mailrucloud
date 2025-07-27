@@ -135,6 +135,12 @@ mailrucloud sync ~/Notes /CloudNotes -d pull
 
 # Только локально → облако
 mailrucloud sync ~/Notes /CloudNotes --direction push
+
+# Быстрая многопоточная загрузка (8 потоков)
+mailrucloud sync ~/Notes /CloudNotes --direction push --threads 8
+
+# Загрузка только новых файлов (без проверки размера)
+mailrucloud sync ~/Notes /CloudNotes --direction push --only-new
 ```
 
 ## 🛣 Roadmap

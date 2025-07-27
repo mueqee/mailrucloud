@@ -20,6 +20,7 @@ from network import get_client
 from upload import upload_file  # переиспользуем функцию
 from download import download_file
 from rich.progress import Progress
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def _posix_join(*segments: str) -> str:
@@ -36,7 +37,7 @@ def ensure_remote_dirs(client, remote_path):
             client.mkdir(subdir)
 
 
-def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "both") -> None:
+def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "both", threads: int = 4, only_new: bool = False) -> None:
     """Синхронизация содержимого *local_dir* и *remote_dir*.
 
     Parameters
@@ -71,12 +72,11 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
                 rel_path = rel_root / fname if rel_root != Path('.') else Path(fname)
                 remote_path = _posix_join(remote_dir, str(rel_path).replace(os.sep, '/'))
 
-                # Проверяем необходимость загрузки
                 needs_upload = False
                 try:
                     if not client.check(remote_path):
                         needs_upload = True
-                    else:
+                    elif not only_new:
                         remote_info: dict[str, Any] = client.info(remote_path)
                         remote_size = int(remote_info.get('size', -1))
                         local_size = local_path.stat().st_size
@@ -88,15 +88,23 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
                 if needs_upload:
                     files_to_upload.append((local_path, remote_path))
 
-        # Прогресс-бар
+        def upload_task(local_path, remote_path):
+            import time
+            start = time.time()
+            parent_remote = "/" + "/".join(remote_path.strip('/').split('/')[:-1])
+            if parent_remote:
+                ensure_remote_dirs(client, parent_remote)
+            upload_file(str(local_path), remote_path)
+            end = time.time()
+            print(f"[✓] {local_path} → {remote_path} ({end-start:.2f} сек)")
+            return local_path, remote_path, end-start
+
         with Progress() as progress:
             task = progress.add_task("Загрузка файлов...", total=len(files_to_upload))
-            for local_path, remote_path in files_to_upload:
-                parent_remote = "/" + "/".join(remote_path.strip('/').split('/')[:-1])
-                if parent_remote:
-                    ensure_remote_dirs(client, parent_remote)
-                upload_file(str(local_path), remote_path)
-                progress.update(task, advance=1, description=f"[green]Загрузка: {local_path.name}")
+            with ThreadPoolExecutor(max_workers=threads) as executor:
+                futures = [executor.submit(upload_task, lp, rp) for lp, rp in files_to_upload]
+                for future in as_completed(futures):
+                    progress.update(task, advance=1)
 
     # --- PULL: облако → локальная -------------------------------------------------
     if direction in {"pull", "both"}:

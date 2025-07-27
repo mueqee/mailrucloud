@@ -73,15 +73,17 @@ def download(remote_path, local_path):
 @click.option('--direction', '-d', type=click.Choice(['push', 'pull', 'both'], case_sensitive=False),
               default='both', show_default=True,
               help="Направление: push (локальное → облако), pull (облако → локальное), both (двусторонняя)")
-def sync(local_dir, remote_dir, direction):
+@click.option('--threads', default=4, show_default=True, type=int, help="Количество потоков для загрузки файлов")
+@click.option('--only-new/--no-only-new', default=False, show_default=True, help="Загружать только новые файлы (без проверки размера)")
+def sync(local_dir, remote_dir, direction, threads, only_new):
     """Синхронизация каталогов LOCAL_DIR и REMOTE_DIR."""
     arrow = {
         'push': '→',
         'pull': '←',
         'both': '↔',
     }[direction.lower()]
-    click.echo(f"⏳ Синхронизация {local_dir} {arrow} {remote_dir} (mode: {direction})")
-    sync_directories(local_dir, remote_dir, direction.lower())
+    click.echo(f"⏳ Синхронизация {local_dir} {arrow} {remote_dir} (mode: {direction}, threads: {threads}, only_new: {only_new})")
+    sync_directories(local_dir, remote_dir, direction.lower(), threads=threads, only_new=only_new)
     click.secho("✅ Синхронизация завершена.", fg="green")
 
 
