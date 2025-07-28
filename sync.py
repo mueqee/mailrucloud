@@ -19,7 +19,7 @@ from typing import Any
 from network import get_client
 from upload import upload_file  # переиспользуем функцию
 from download import download_file
-from rich.progress import Progress
+from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn, TransferSpeedColumn, MofNCompleteColumn
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
@@ -107,14 +107,15 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
 
         if len(files_to_upload) > 0:
             with Progress(
-                "[progress.description]{task.description}",
-                "[progress.percentage]{task.percentage:>3.0f}%",
-                "({task.completed}/{task.total} файлов)",
-                "[red]ETA: {task.time_remaining}",
-                "[cyan]Скорость: {task.speed:.1f} МБ/с",
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                MofNCompleteColumn(),
+                TimeRemainingColumn(),
+                TextColumn("Скорость: {task.fields[avg_speed]:.1f} МБ/с"),
                 transient=False
             ) as progress:
-                task = progress.add_task("Загрузка файлов...", total=len(files_to_upload))
+                task = progress.add_task("Загрузка файлов...", total=len(files_to_upload), avg_speed=0.0)
                 total_size = 0
                 total_duration = 0
                 
@@ -126,8 +127,8 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
                         total_duration += duration
                         avg_speed = (total_size / (1024 * 1024)) / total_duration if total_duration > 0 else 0
                         
-                        progress.update(task, advance=1, speed=avg_speed, 
-                                      description=f"[green]✓ {local_path.name}")
+                        progress.update(task, advance=1, avg_speed=avg_speed, 
+                                      description=f"✓ {local_path.name}")
                         print(f"[✓] {local_path} → {remote_path} ({duration:.2f} сек, {speed_mb:.1f} МБ/с)")
         else:
             print("Нет файлов для загрузки")
