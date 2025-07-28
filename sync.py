@@ -94,17 +94,43 @@ def sync_directories(local_dir: str, remote_dir: str = "/", direction: str = "bo
             parent_remote = "/" + "/".join(remote_path.strip('/').split('/')[:-1])
             if parent_remote:
                 ensure_remote_dirs(client, parent_remote)
+            
+            # Получаем размер файла для расчёта скорости
+            file_size = local_path.stat().st_size
             upload_file(str(local_path), remote_path)
             end = time.time()
-            print(f"[✓] {local_path} → {remote_path} ({end-start:.2f} сек)")
-            return local_path, remote_path, end-start
+            duration = end - start
+            speed = file_size / duration if duration > 0 else 0
+            speed_mb = speed / (1024 * 1024)  # МБ/с
+            
+            return local_path, remote_path, duration, file_size, speed_mb
 
-        with Progress() as progress:
-            task = progress.add_task("Загрузка файлов...", total=len(files_to_upload))
-            with ThreadPoolExecutor(max_workers=threads) as executor:
-                futures = [executor.submit(upload_task, lp, rp) for lp, rp in files_to_upload]
-                for future in as_completed(futures):
-                    progress.update(task, advance=1)
+        if len(files_to_upload) > 0:
+            with Progress(
+                "[progress.description]{task.description}",
+                "[progress.percentage]{task.percentage:>3.0f}%",
+                "({task.completed}/{task.total} файлов)",
+                "[red]ETA: {task.time_remaining}",
+                "[cyan]Скорость: {task.speed:.1f} МБ/с",
+                transient=False
+            ) as progress:
+                task = progress.add_task("Загрузка файлов...", total=len(files_to_upload))
+                total_size = 0
+                total_duration = 0
+                
+                with ThreadPoolExecutor(max_workers=threads) as executor:
+                    futures = [executor.submit(upload_task, lp, rp) for lp, rp in files_to_upload]
+                    for future in as_completed(futures):
+                        local_path, remote_path, duration, file_size, speed_mb = future.result()
+                        total_size += file_size
+                        total_duration += duration
+                        avg_speed = (total_size / (1024 * 1024)) / total_duration if total_duration > 0 else 0
+                        
+                        progress.update(task, advance=1, speed=avg_speed, 
+                                      description=f"[green]✓ {local_path.name}")
+                        print(f"[✓] {local_path} → {remote_path} ({duration:.2f} сек, {speed_mb:.1f} МБ/с)")
+        else:
+            print("Нет файлов для загрузки")
 
     # --- PULL: облако → локальная -------------------------------------------------
     if direction in {"pull", "both"}:
